@@ -1,10 +1,10 @@
 const Marker = Object.freeze({
     empty: '-',
-    x: 'x',
-    o: 'o'
+    x: 'X',
+    o: 'O'
 });
 
-const gameBoard = (() => {
+const GameBoard = (() => {
     // Board and dimensions
     const board = [];
     const rows = 3;
@@ -20,14 +20,27 @@ const gameBoard = (() => {
         }
     };
 
-    // Get the current game board
+    // get the current game board
     const getGameBoard = () => {
-        for (let i = 0; i < rows; i++) {
-            console.log(board[i]);
-        }
+        return board;
     };
 
-    return { createGameBoard, getGameBoard };
+    // player makes a move
+    const placeMarker = (space) => {
+
+    }
+
+    // check if a move is valid (i.e. space is empty)
+    const moveIsValid = (space) => {
+
+    }
+
+    // check if a player has won or the game has ended in a draw
+    const isGameOver = () => {
+        return false;
+    };
+
+    return { createGameBoard, getGameBoard, isGameOver };
 })();
 
 
@@ -39,7 +52,24 @@ const Player = (() => {
     return { createPlayer };
 })();
 
-const player1 = Player.createPlayer("Player 1", Marker.x);
-const player2 = Player.createPlayer("Player 2", Marker.o);
-gameBoard.createGameBoard();
-gameBoard.getGameBoard();
+const GameController = (() => {
+    // initialize game state
+    const player1 = Player.createPlayer("Player 1", Marker.x);
+    const player2 = Player.createPlayer("Player 2", Marker.o);
+    const currentPlayer = player1;
+    const winner = null;
+
+    const displayGameBoard = (board) => {
+        const rows = board.length;
+        for (let i = 0; i < rows; i++) {
+            console.log(board[i]);
+        }
+    }
+
+    GameBoard.createGameBoard();
+    console.clear;
+    // while (!GameBoard.isGameOver()) {
+    //     console.clear();
+    // }
+    displayGameBoard(GameBoard.getGameBoard());
+})();
