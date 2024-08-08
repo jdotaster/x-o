@@ -25,22 +25,37 @@ const GameBoard = (() => {
         return board;
     };
 
-    // player makes a move
-    const placeMarker = (space) => {
+    const displayGameBoard = () => {
+        const rows = board.length;
+        for (let i = 0; i < rows; i++) {
+            console.log(board[i]);
+        }
+    };
 
-    }
+    // player makes a move
+    const placeMarker = (player, x, y) => {
+        if (moveIsValid(x,y)) {
+            board[x][y] = player.marker;
+        } else {
+            console.log("Invalid move");
+        }
+    };
 
     // check if a move is valid (i.e. space is empty)
-    const moveIsValid = (space) => {
-
-    }
+    const moveIsValid = (x, y) => {
+        if (board[x][y] === Marker.empty) {
+            return true;
+        } else {
+            return false;
+        }
+    };
 
     // check if a player has won or the game has ended in a draw
     const isGameOver = () => {
         return false;
     };
 
-    return { createGameBoard, getGameBoard, isGameOver };
+    return { createGameBoard, getGameBoard, displayGameBoard, placeMarker, isGameOver };
 })();
 
 
@@ -54,22 +69,32 @@ const Player = (() => {
 
 const GameController = (() => {
     // initialize game state
+    GameBoard.createGameBoard();
     const player1 = Player.createPlayer("Player 1", Marker.x);
     const player2 = Player.createPlayer("Player 2", Marker.o);
-    const currentPlayer = player1;
+    const board = GameBoard.getGameBoard(); // will this work??
+    let currentPlayer;
     const winner = null;
 
-    const displayGameBoard = (board) => {
-        const rows = board.length;
-        for (let i = 0; i < rows; i++) {
-            console.log(board[i]);
+    const getCurrentPlayer = () => {
+        if (currentPlayer === (null || undefined) || currentPlayer === player2) {
+            console.log("Current player is now player 1")
+            currentPlayer = player1;
+        } else {
+            console.log("Current player is now player 2")
+            currentPlayer = player2;
+        }
+    };
+
+    let testCounter = 0;
+    while (!GameBoard.isGameOver()) {
+        getCurrentPlayer();
+        GameBoard.displayGameBoard();
+        GameBoard.placeMarker(currentPlayer, testCounter, 1);
+        testCounter += 1;
+        if (testCounter === 3) {
+            return;
         }
     }
 
-    GameBoard.createGameBoard();
-    console.clear;
-    // while (!GameBoard.isGameOver()) {
-    //     console.clear();
-    // }
-    displayGameBoard(GameBoard.getGameBoard());
 })();
