@@ -83,6 +83,9 @@ const GameController = (() => {
     };
 
     const setPlayerMarker = (space) => {
+        if (gameStatus === GameStatus.draw || gameStatus === GameStatus.win) {
+            return;
+        }
         gameStatus = GameStatus.playing;
         if (!moveIsValid(space)) {
             gameStatus = GameStatus.invalidMove;
@@ -92,6 +95,11 @@ const GameController = (() => {
         space.setMarker(marker);
         if (gameIsDraw()) {
             gameStatus = GameStatus.draw;
+            return;
+        }
+        if (moveWinsGame(space)) {
+            gameStatus = GameStatus.win;
+            return;
         }
         updateActivePlayer();
     };
@@ -118,15 +126,25 @@ const GameController = (() => {
 
     const getActivePlayer = () => activePlayer;
 
-    const moveWinsGame = (x, y) => {
-        let marker = board[x][y].getMarker();
+    const moveWinsGame = (space) => {
+        const marker = space.getMarker();
         let [rowCount, colCount, diagCount] = [0,0,0];
+        let x, y;
+
+        for (let m = 0; m < 3; m++) {
+            for (let n = 0; n < 3; n++) {
+                if (gameState[m][n] === space) {
+                    x = m;
+                    y = n;
+                }
+            }
+        };
 
         for (let i = 0; i < 3; i++) {
-            if (board[x][i].getMarker() === marker) {
+            if (gameState[x][i].getMarker() === marker) {
                 ++rowCount;
             }
-            if (board[i][y].getMarker() === marker) {
+            if (gameState[i][y].getMarker() === marker) {
                 ++colCount;
             }
             if (rowCount === 3 || colCount === 3) {
@@ -137,7 +155,7 @@ const GameController = (() => {
         if (((x + y) % 2) === 0) {
             if (x + y === 2) {
                 for (let j = 0; j < 3; j++) {
-                    if (board[2-j][0 + j].getMarker() === marker) {
+                    if (gameState[2-j][0 + j].getMarker() === marker) {
                         ++diagCount;
                     }
                     if (diagCount === 3) {
@@ -146,7 +164,7 @@ const GameController = (() => {
                 }
             } else {
                 for (let k = 0; k < 3; k++) {
-                    if (board[k][k].getMarker() === marker) {
+                    if (gameState[k][k].getMarker() === marker) {
                         ++diagCount;
                     }
                     if (diagCount === 3) {
@@ -155,7 +173,6 @@ const GameController = (() => {
                 }
             }
         }
-
         return false;
     };
 
@@ -204,6 +221,9 @@ const DisplayController = (() => {
                             break;
                         case GameStatus.draw:
                             document.getElementsByClassName("game-text-display")[0].innerHTML = `${game.getGameStatus()}`;
+                            break;
+                        case GameStatus.win:
+                            document.getElementsByClassName("game-text-display")[0].innerHTML = `Winner: ${game.getActivePlayer().getName()}`
                     }
                 });
                 board.appendChild(cell);
