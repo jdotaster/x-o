@@ -4,21 +4,6 @@ const Marker = Object.freeze({
     o: 'O'
 });
 
-const BoardSpace = (() => {
-    let marker = Marker.empty;
-
-    const setMarker = (player) => {
-        value = player.marker;
-    }
-
-    const getMarker = () => marker;
-
-    return { 
-        setMarker, 
-        getMarker 
-    };
-});
-
 
 const Player = ((playerName, playerMarker) => {
     let name = playerName;
@@ -32,6 +17,23 @@ const Player = ((playerName, playerMarker) => {
         getMarker 
     };
 });
+
+
+const BoardSpace = (() => {
+    let marker = Marker.empty;
+
+    const setMarker = (playerMarker) => {
+        marker = playerMarker;
+    }
+
+    const getMarker = () => marker;
+
+    return { 
+        setMarker, 
+        getMarker 
+    };
+});
+
 
 const Board = (() => {
     const board = [];
@@ -64,15 +66,17 @@ const GameController = (() => {
     let activePlayer = players[0];
 
     const getGameState = (() => {
-        return gameState.map((row) => row.map((boardSpace) => boardSpace.getMarker()))
+        //return gameState.map((row) => row.map((boardSpace) => boardSpace.getMarker()))
+        return gameState;
     });
 
     const updateActivePlayer = () => {
-        activePlayer = ((players.indexOf(activePlayer) + 1) % 2);
+        activePlayer = (players[(players.indexOf(activePlayer) + 1) % 2]);
     };
 
-    const placePlayerMarker = (player, space) => {
-        space.setMarker(player.getMarker());
+    const setPlayerMarker = (space) => {
+        const marker = activePlayer.getMarker();
+        space.setMarker(marker);
         updateActivePlayer();
     };
 
@@ -95,7 +99,7 @@ const GameController = (() => {
         return (counter === 9);
     };
 
-    const getActivePlayer = () => { activePlayer };
+    const getActivePlayer = () => activePlayer;
 
     const moveWinsGame = (x, y) => {
         let marker = board[x][y].getMarker();
@@ -140,11 +144,45 @@ const GameController = (() => {
 
     return { 
         getGameState,
+        setPlayerMarker,
         getActivePlayer
     };
 });
 
-const ConsoleDisplayController = (() => {
+const DisplayController = (() => {
     const game = GameController();
-    console.log(game.getGameState());
+
+    const createGameElements = () => {
+        const gameState = game.getGameState();
+        const gameBoardContainer = document.getElementsByClassName("game-board-container")[0];
+
+        const board = document.createElement("div");
+        board.classList.add("board");
+
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                const cell = document.createElement("div");
+
+                if (i % 2 === 0) {
+                    i === 0 ? cell.classList.add("cell-upper") : cell.classList.add("cell-lower");
+                }
+                if (j % 2 === 0) {
+                    j === 0 ? cell.classList.add("cell-left") : cell.classList.add("cell-right");
+                }
+                
+                cell.classList.add("cell");
+                cell.innerHTML = gameState[i][j].getMarker();
+                cell.addEventListener("click", () => {
+                    game.setPlayerMarker(game.getGameState()[i][j]);
+                    cell.innerHTML = game.getGameState()[i][j].getMarker();
+                });
+                board.appendChild(cell);
+            }
+        }
+        gameBoardContainer.appendChild(board);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        createGameElements();
+    });
 })();
