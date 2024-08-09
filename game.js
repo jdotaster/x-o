@@ -5,6 +5,14 @@ const Marker = Object.freeze({
 });
 
 
+const GameStatus = Object.freeze({
+    playing: "Playing",
+    invalidMove: "Invalid move",
+    win: "Win",
+    draw: "Draw"
+})
+
+
 const Player = ((playerName, playerMarker) => {
     let name = playerName;
     let marker = playerMarker;
@@ -64,19 +72,27 @@ const GameController = (() => {
     const board = Board();
     const gameState = board.getGameBoard();
     let activePlayer = players[0];
+    let gameStatus = GameStatus.playing;
 
-    const getGameState = (() => {
-        //return gameState.map((row) => row.map((boardSpace) => boardSpace.getMarker()))
-        return gameState;
-    });
+    const getGameState = () => gameState;
+
+    const getGameStatus = () => gameStatus;
 
     const updateActivePlayer = () => {
         activePlayer = (players[(players.indexOf(activePlayer) + 1) % 2]);
     };
 
     const setPlayerMarker = (space) => {
+        gameStatus = GameStatus.playing;
+        if (!moveIsValid(space)) {
+            gameStatus = GameStatus.invalidMove;
+            return;
+        }
         const marker = activePlayer.getMarker();
         space.setMarker(marker);
+        if (gameIsDraw()) {
+            gameStatus = GameStatus.draw;
+        }
         updateActivePlayer();
     };
 
@@ -89,9 +105,10 @@ const GameController = (() => {
 
     const gameIsDraw = () => {
         let counter = 0;
-        for (let i = 0; i < rows; i++) {
-            for (let j = 0; j < columns; j++) {
-                if (board[i][j].getMarker() !== Marker.empty) {
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                const test = gameState[i][j];
+                if (gameState[i][j].getMarker() !== Marker.empty) {
                     counter++;
                 }
             }
@@ -144,6 +161,7 @@ const GameController = (() => {
 
     return { 
         getGameState,
+        getGameStatus,
         setPlayerMarker,
         getActivePlayer
     };
@@ -155,6 +173,8 @@ const DisplayController = (() => {
     const createGameElements = () => {
         const gameState = game.getGameState();
         const gameBoardContainer = document.getElementsByClassName("game-board-container")[0];
+
+        document.getElementsByClassName("game-text-display")[0].innerHTML = `${game.getActivePlayer().getName()}'s turn`;
 
         const board = document.createElement("div");
         board.classList.add("board");
@@ -175,6 +195,16 @@ const DisplayController = (() => {
                 cell.addEventListener("click", () => {
                     game.setPlayerMarker(game.getGameState()[i][j]);
                     cell.innerHTML = game.getGameState()[i][j].getMarker();
+                    switch (game.getGameStatus()) {
+                        case GameStatus.playing:
+                            document.getElementsByClassName("game-text-display")[0].innerHTML = `${game.getActivePlayer().getName()}'s turn`;
+                            break;
+                        case GameStatus.invalidMove:
+                            window.alert("Invalid move.");
+                            break;
+                        case GameStatus.draw:
+                            document.getElementsByClassName("game-text-display")[0].innerHTML = `${game.getGameStatus()}`;
+                    }
                 });
                 board.appendChild(cell);
             }

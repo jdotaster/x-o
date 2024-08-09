@@ -26,10 +26,16 @@ body {
 .game-title {
     grid-area: game-title;
     text-align: center;
+    background-color: rgb(0,0,0,30%);
 }
 
 .game-board-container {
     display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 9fr;
+    grid-template-areas: 
+        "game-text-display"
+        "game-board";
     grid-area: game-board;
     height: 80vh;
     justify-content: center;
@@ -63,7 +69,13 @@ body {
     font-size: 10rem;
 }
 
+.game-text-display {
+    grid-area: game-text-display;
+    margin: auto;
+}
+
 .board {
+    grid-area: game-board;
     height: 80%;
     aspect-ratio: 1;
     margin: auto;
